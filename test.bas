@@ -1,4 +1,4 @@
-open "Release\SysGuid.dll" for DLL as #sg
+open "Debug\SysGuid.dll" for DLL as #sg
 CallDLL #sg, "GetSystemGUID",_
 ret as ulong
 

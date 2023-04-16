@@ -21,7 +21,6 @@ struct dmi_header
     BYTE data[1];
 };
 
-
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
@@ -43,6 +42,7 @@ __declspec(dllexport) LPCSTR __stdcall GetSystemGUID()
     RawSMBIOSData* SMBiosData = NULL;
     DWORD SMBiosDataSize = 0;
     BYTE* dmi_data = NULL;
+    GUID* guid = NULL;
 
     SMBiosDataSize = GetSystemFirmwareTable('RSMB', 0, NULL, 0);
     SMBiosData = (RawSMBIOSData*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, SMBiosDataSize);
@@ -74,21 +74,16 @@ __declspec(dllexport) LPCSTR __stdcall GetSystemGUID()
             // UUID starts at offset 0x08
             dmi_data += 0x08;
 
+            guid = (GUID*)dmi_data;
             char* strUuidPos = strUuid;
 
-            // The UUID stored in the BIOS is arranged in a different order than
-            // GUIDs are usually displayed, so we switch that around when building
-            // the return string.
-            snprintf(strUuidPos, 25, "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-",
-                dmi_data[3], dmi_data[2], dmi_data[1], dmi_data[0],
-                dmi_data[5], dmi_data[4],
-                dmi_data[7], dmi_data[6],
-                dmi_data[8], dmi_data[9]);
+            snprintf(strUuidPos, 25, "%08X-%04X-%04X-%02X%02X-",
+                guid->Data1, guid->Data2, guid->Data3, guid->Data4[0], guid->Data4[1]);
 
             strUuidPos += 24;
-            for (int i = 10; i < 16; i++)
+            for (int i = 2; i < 8; i++)
             {
-                snprintf(strUuidPos, 3, "%02X", dmi_data[i]);
+                snprintf(strUuidPos, 3, "%02X", guid->Data4[i]);
                 strUuidPos += 2;
             }
 

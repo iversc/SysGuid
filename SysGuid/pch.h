@@ -9,5 +9,6 @@
 
 // add headers that you want to pre-compile here
 #include "framework.h"
+#include "guiddef.h"
 
 #endif //PCH_H
